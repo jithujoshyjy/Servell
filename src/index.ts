@@ -72,7 +72,7 @@ export function client<T>(arg0: RpcHelperProps | Class<T> = { ...rpcHelperProps 
    }
    ```
  */
-export function param<T>(arg0: RpcFnHelperProps | ExtendedFunction = { ...rpcFnHelperProps }, context?: RpcFnHelperDecoratorContext<T>) {
+export function params<T>(arg0: RpcFnHelperProps | ExtendedFunction = { ...rpcFnHelperProps }, context?: RpcFnHelperDecoratorContext<T>) {
     if (typeof arg0 == "function")
         return rpcFnHelper.call(null, { ...rpcFnHelperProps }, arg0, context!)
     return rpcFnHelper.bind(null, arg0)
@@ -181,7 +181,7 @@ function rpcHelper(rpcProps: RpcHelperProps, klass: Class, context: ClassDecorat
     function serverResponseWrapper(fn: ExtendedFunction) {
         return async (...args: any[]) => {
             const content = fn[RPCExtension]?.content ?? "json"
-            let wrappedResult = { status: "error", data: undefined as any | undefined }
+            let wrappedResult: Result<any, any> = { status: "error" }
             try {
                 const result = await fn(...args)
                 switch (content) {
@@ -253,13 +253,23 @@ export function isAsyncFunction(fn: Function) {
     return fn instanceof AsyncFunction
 }
 
+export type Result<T = undefined, U = undefined> =
+    | {
+        status: "ok",
+        data?: T
+    }
+    | {
+        status: "error",
+        data?: U
+    }
+
 type RpcFnHelperDecoratorContext<T> = ClassMethodDecoratorContext<T, (...args: any[]) => Promise<any>>
 
 type Class<T = any> = new (...args: any[]) => T
 
 type RpcNamespaces = Map<
     string, Map<
-        string, (...args: any[]) => Promise<{ status: "ok" | "error", data?: any }>
+        string, (...args: any[]) => Promise<Result>
     >
 >
 
