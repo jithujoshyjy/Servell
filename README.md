@@ -54,10 +54,7 @@ export default function TodoList() {
     const [todos, setTodos] =  useState<Todo[]>([])
     // You can use react query as well
     // sticking to stinky useEffect for simplicity
-    useEffect(async () => {
-        const todos = await getTodos(setTodos)
-        setTodos(todos)
-    }, [])
+    useEffect(async () => await getTodos(setTodos), [])
     return (
         <ul>
             {todos.map(todo =>
