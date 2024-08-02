@@ -163,8 +163,6 @@ class TodoActions {
 }
 ```
 
--- PENDING -- Need to get the `body` param of non GET requests to point to a function parameter.
-
 Let me know if you enjoy it!
 
 ---
