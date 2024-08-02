@@ -9,7 +9,7 @@
     </tr>
 </table>
 
-<table>
+<table border="0">
     <tr>
         <td>version</td>
         <td>:</td>
