@@ -1,6 +1,6 @@
 /**
  * @module servell
- * @version 0.0.1
+ * @version 0.0.4
  * @author Jithu Joshy &lt;jithujoshyjy@gmail.com>
  * @description # Remote Procedure Call - RPC implementation (sort of 😅)\
  * just so that I don't have to deal with the boilerplate
