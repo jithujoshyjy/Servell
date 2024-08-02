@@ -11,8 +11,8 @@
 /**
  * @summary Can be used in a server-only context (like in a server component)
  * @description Modifies public async methods used in the class to read/write data from a server context
- * to work semalessy with route handlers and calls from frontend.\
- * Use the `@⁣param` decorator to supply additional information to the route handler.
+ * to work seamlessly with route handlers and calls from frontend.\
+ * Use the `@⁣params` decorator on methods to supply additional information to the route handler.
  * 
  * @example
  * ```typescript
@@ -22,7 +22,7 @@
    }
    ```
  * @example
- * The default **endpoint** is `/api/rpc`, you must provide `@erver({ endpoint }) to change it`\
+ * The default **endpoint** is `/api/rpc`, you must provide `@server({ endpoint }) to change it`\
  * Also the endpoint must have the required HTTP method handlers like so:
  * ```typescript
  * // /api/rpc/route.ts or /your-endpoint/route.ts
@@ -48,7 +48,7 @@ export function server(arg0: any = { ...rpcHelperProps }, context?: any) {
  * @description Modifies public async methods used in the class to fetch/mutate data from the client.\
  * The class and method names must match that on the server.\
  * The result of the fetch is passed as the last argument to the original method.\
- * Use the `@⁣param` decorator to supply additional information to the fetch request.
+ * Use the `@⁣params` decorator on methods to supply additional information to the fetch request.
  * @example
  * ```typescript
    ＠client
@@ -73,7 +73,7 @@ export function client(arg0: any = { ...rpcHelperProps }, context?: any) {
  * ```typescript
  * ＠client
    class KlassName {
-      ＠param({ method: "POST" })
+      ＠params({ method: "POST" })
       async methodName(...args: any[], result: type) { }
    }
    ```

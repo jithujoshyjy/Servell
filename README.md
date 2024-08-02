@@ -26,7 +26,7 @@
 
 -- NOTES --
 * Only public async methods of the class are modified.
-* NextJS as of v14.2.3 does not support stage 3 ecmascript decorators by default, so you'll have to do some node_modules gymnastics to get it working.
+* NextJS as of v14.2.3 does not support stage 3 ecmascript decorators by default, so you'll have to do some node_modules gymnastics to get it working (See this [issue](https://github.com/vercel/next.js/issues/48360#issuecomment-1687020800) from nextjs repo)
 
 ## Why not Server Actions?
 * Server actions are limited to POST requests
