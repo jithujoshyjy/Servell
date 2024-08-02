@@ -135,7 +135,7 @@ interface RpcFnHelperProps {
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     content?: "json" | "text";
     headers?: HeadersInit;
-    body?: BodyInit;
+    body?: BodyInit | boolean;
     cache?: RequestCache;
 }
 interface RpcHelperProps {
