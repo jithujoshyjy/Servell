@@ -166,4 +166,10 @@ class TodoActions {
 Let me know if you enjoy it!
 
 ---
-<center>peace✌</center>
+<table align="center">
+    <tr>
+        <td>
+            peace✌
+        </td>
+    </tr>
+</table>
