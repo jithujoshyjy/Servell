@@ -1,10 +1,10 @@
 {
     "name": "servell",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "type": "module",
     "main": "dist/bundle.js",
     "scripts": {
-        "build": "rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript"
+        "build": "rollup -c"
     },
     "keywords": [
         "RPC",
