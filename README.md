@@ -13,7 +13,7 @@
     <tr>
         <td>version</td>
         <td>:</td>
-        <td>v0.0.2</td>
+        <td>v0.0.25</td>
     </tr>
     <tr>
         <td>description</td>

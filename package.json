@@ -1,8 +1,12 @@
 {
     "name": "servell",
-    "version": "0.0.2",
+    "version": "0.0.25",
     "type": "module",
     "main": "dist/bundle.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "rollup -c"
     },
@@ -11,9 +15,16 @@
         "Remote Procedure Call",
         "Server Action"
     ],
-    "author": "Jithu Joshy",
-    "license": "ISC",
-    "description": "",
+    "author": "Jithu Joshy <jithujoshyjy@gmail.com>",
+    "license": "MIT",
+    "description": "A minimal RPC library inspired by React Server Actions",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jithujoshyjy/Servell.git"
+    },
+    "bugs": {
+        "url": "https://github.com/jithujoshyjy/Servell/issues"
+    },
     "devDependencies": {
         "@rollup/plugin-terser": "^0.4.4",
         "@rollup/plugin-typescript": "^11.1.6",
