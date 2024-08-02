@@ -5,17 +5,17 @@
  * @description # Remote Procedure Call - RPC implementation (sort of 😅)\
  * just so that I don't have to deal with the boilerplate
  * of writing routes handlers and fetch requests!\
- * Only public async methods of the class are modified.\
- * -- WARNING -- The code in the examples uses Invisible Separator U+2063 to render '@'. Copy with caution.
+ * Only public async methods of the class are modified.
  */
 /**
  * @summary Can be used in a server-only context (like in a server component)
  * @description Modifies public async methods used in the class to read/write data from a server context
  * to work semalessy with route handlers and calls from frontend.\
  * Use the `@⁣param` decorator to supply additional information to the route handler.
+ *
  * @example
  * ```typescript
-   @server
+   ＠server
    class KlassName {
       async methodName(...args: any[]) { }
    }
@@ -24,7 +24,7 @@
  * The default **endpoint** is `/api/rpc`, you must provide `@erver({ endpoint }) to change it`\
  * Also the endpoint must have the required HTTP method handlers like so:
  * ```typescript
- * // /api/rpc/route.ts or your-endpoint/route.ts
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
    import { deleteHandler, getHandler, patchHandler, postHandler, putHandler } from "servell"
    export const GET = getHandler
    export const POST = postHandler
@@ -33,15 +33,8 @@
    export const DELETE = deleteHandler
    ```
  */
-export declare function server<T>(arg0?: RpcHelperProps | Class<T>, context?: ClassDecoratorContext): {
-    new (...args: any[]): {
-        [x: string]: any;
-    };
-} | ((klass: Class<any>, context: ClassDecoratorContext) => {
-    new (...args: any[]): {
-        [x: string]: any;
-    };
-});
+export declare function server(options?: RpcHelperProps): ReturnType<typeof rpcHelper>;
+export declare function server<This extends new (...args: any[]) => any>(klass: This, context: ClassDecoratorContext<This>): ReturnType<typeof rpcHelper>;
 /**
  * @summary Can be used in a client-only context (like in a client component)
  * @description Modifies public async methods used in the class to fetch/mutate data from the client.\
@@ -50,45 +43,85 @@ export declare function server<T>(arg0?: RpcHelperProps | Class<T>, context?: Cl
  * Use the `@⁣param` decorator to supply additional information to the fetch request.
  * @example
  * ```typescript
-   @client
+   ＠client
    class KlassName {
       async methodName(...args: any[], result: type) { }
    }
    ```
  */
-export declare function client<T>(arg0?: RpcHelperProps | Class<T>, context?: ClassDecoratorContext): {
-    new (...args: any[]): {
-        [x: string]: any;
-    };
-} | ((klass: Class<any>, context: ClassDecoratorContext) => {
-    new (...args: any[]): {
-        [x: string]: any;
-    };
-});
+export declare function client(options?: RpcHelperProps): ReturnType<typeof rpcHelper>;
+export declare function client<This extends new (...args: any[]) => any>(klass: This, context: ClassDecoratorContext<This>): ReturnType<typeof rpcHelper>;
 /**
  * @description Can be used to supply additional information to the fetch request on the client\
  * or the route handler on the server.
  * @example
  * ```typescript
- * @client
+ * ＠client
    class KlassName {
-      @param({ method: "POST" })
+      ＠param({ method: "POST" })
       async methodName(...args: any[], result: type) { }
    }
    ```
  */
-export declare function params<T>(arg0?: RpcFnHelperProps | ExtendedFunction, context?: RpcFnHelperDecoratorContext<T>): void | ((fn: ExtendedFunction, context: RpcFnHelperDecoratorContext<unknown>) => void);
+export declare function params(options?: RpcFnHelperProps): (fn: Parameters<typeof rpcFnHelper>[1], context: Parameters<typeof rpcFnHelper>[2]) => void;
+export declare function params<This, Args extends any[], Return>(fn: ExtendedFunction<This, Args, Return>, context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>): void;
+/**
+ * @description A route handler to intercept GET requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { getHandler } from "servell"
+ * export const GET = getHandler
+ * ```
+ */
 export declare const getHandler: (req: Request, res: Response) => Promise<Response>;
+/**
+ * @description A route handler to intercept POST requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { postHandler } from "servell"
+ * export const POST = postHandler
+ * ```
+ */
 export declare const postHandler: (req: Request, res: Response) => Promise<Response>;
+/**
+ * @description A route handler to intercept PUT requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { putHandler } from "servell"
+ * export const PUT = putHandler
+ * ```
+ */
 export declare const putHandler: (req: Request, res: Response) => Promise<Response>;
+/**
+ * @description A route handler to intercept PATCH requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { patchHandler } from "servell"
+ * export const PATCH = patchHandler
+ * ```
+ */
 export declare const patchHandler: (req: Request, res: Response) => Promise<Response>;
+/**
+ * @description A route handler to intercept DELETE requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { deleteHandler } from "servell"
+ * export const DELETE = deleteHandler
+ * ```
+ */
 export declare const deleteHandler: (req: Request, res: Response) => Promise<Response>;
-export type ClassDecoratorContext = {
-    kind: "class";
-    name: string | undefined;
-    addInitializer(initializer: () => void): void;
-};
 declare const RPCExtension: unique symbol;
+declare function rpcHelper<This extends new (...args: any[]) => any>(rpcProps: RpcHelperProps, klass: This, context: ClassDecoratorContext<This>): {
+    new (...args: any[]): {
+        [x: string]: any;
+    };
+} & This;
+declare function rpcFnHelper<This, Args extends any[], Return>(rpcFnProps: RpcFnHelperProps, fn: ExtendedFunction<This, Args, Return>, context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>): void;
 export declare function isBrowser(): boolean;
 export declare function isAsyncFunction(fn: Function): boolean;
 export type Result<T = undefined, U = undefined> = {
@@ -98,8 +131,6 @@ export type Result<T = undefined, U = undefined> = {
     status: "error";
     data?: U;
 };
-type RpcFnHelperDecoratorContext<T> = ClassMethodDecoratorContext<T, (...args: any[]) => Promise<any>>;
-type Class<T = any> = new (...args: any[]) => T;
 interface RpcFnHelperProps {
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     content?: "json" | "text";
@@ -111,8 +142,8 @@ interface RpcHelperProps {
     endpoint: string;
     _context?: "server" | "client";
 }
-interface ExtendedFunction {
-    (...args: any[]): any;
-    [RPCExtension]: RpcFnHelperProps;
+interface ExtendedFunction<This, Args extends any[], Return> {
+    (this: This, ...args: Args): Return;
+    [RPCExtension]?: RpcFnHelperProps;
 }
 export {};
