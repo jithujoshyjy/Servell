@@ -5,8 +5,7 @@
  * @description # Remote Procedure Call - RPC implementation (sort of 😅)\
  * just so that I don't have to deal with the boilerplate
  * of writing routes handlers and fetch requests!\
- * Only public async methods of the class are modified.\
- * -- WARNING -- The code in the examples uses Invisible Separator U+2063 to render '@'. Copy with caution.
+ * Only public async methods of the class are modified.
  */
 
 /**
@@ -14,9 +13,10 @@
  * @description Modifies public async methods used in the class to read/write data from a server context
  * to work semalessy with route handlers and calls from frontend.\
  * Use the `@⁣param` decorator to supply additional information to the route handler.
+ * 
  * @example
  * ```typescript
-   @server
+   ＠server
    class KlassName {
       async methodName(...args: any[]) { }
    }
@@ -25,7 +25,7 @@
  * The default **endpoint** is `/api/rpc`, you must provide `@erver({ endpoint }) to change it`\
  * Also the endpoint must have the required HTTP method handlers like so:
  * ```typescript
- * // /api/rpc/route.ts or your-endpoint/route.ts
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
    import { deleteHandler, getHandler, patchHandler, postHandler, putHandler } from "servell"
    export const GET = getHandler
    export const POST = postHandler
@@ -34,9 +34,12 @@
    export const DELETE = deleteHandler
    ```
  */
-export function server<T>(arg0: RpcHelperProps | Class<T> = { ...rpcHelperProps }, context?: ClassDecoratorContext) {
+export function server(options?: RpcHelperProps): ReturnType<typeof rpcHelper>
+export function server<This extends new (...args: any[]) => any>(klass: This, context: ClassDecoratorContext<This>): ReturnType<typeof rpcHelper>
+
+export function server(arg0: any = { ...rpcHelperProps }, context?: any) {
     if (typeof arg0 == "function")
-        return rpcHelper.call(null, { ...rpcHelperProps, _context: "server" }, arg0, context!)
+        return rpcHelper.call(null, { ...rpcHelperProps, _context: "server" }, arg0, context)
     return rpcHelper.bind(null, { ...arg0, _context: "server" })
 }
 
@@ -48,15 +51,18 @@ export function server<T>(arg0: RpcHelperProps | Class<T> = { ...rpcHelperProps 
  * Use the `@⁣param` decorator to supply additional information to the fetch request.
  * @example
  * ```typescript
-   @client
+   ＠client
    class KlassName {
       async methodName(...args: any[], result: type) { }
    }
    ```
  */
-export function client<T>(arg0: RpcHelperProps | Class<T> = { ...rpcHelperProps }, context?: ClassDecoratorContext) {
+export function client(options?: RpcHelperProps): ReturnType<typeof rpcHelper>
+export function client<This extends new (...args: any[]) => any>(klass: This, context: ClassDecoratorContext<This>): ReturnType<typeof rpcHelper>
+
+export function client(arg0: any = { ...rpcHelperProps }, context?: any) {
     if (typeof arg0 == "function")
-        return rpcHelper.call(null, { ...rpcHelperProps, _context: "client" }, arg0, context!)
+        return rpcHelper.call(null, { ...rpcHelperProps, _context: "client" }, arg0, context)
     return rpcHelper.bind(null, { ...arg0, _context: "client" })
 }
 
@@ -65,43 +71,85 @@ export function client<T>(arg0: RpcHelperProps | Class<T> = { ...rpcHelperProps 
  * or the route handler on the server.
  * @example
  * ```typescript
- * @client
+ * ＠client
    class KlassName {
-      @param({ method: "POST" })
+      ＠param({ method: "POST" })
       async methodName(...args: any[], result: type) { }
    }
    ```
  */
-export function params<T>(arg0: RpcFnHelperProps | ExtendedFunction = { ...rpcFnHelperProps }, context?: RpcFnHelperDecoratorContext<T>) {
+export function params(options?: RpcFnHelperProps): (fn: Parameters<typeof rpcFnHelper>[1], context: Parameters<typeof rpcFnHelper>[2]) => void
+export function params<This, Args extends any[], Return>(fn: ExtendedFunction<This, Args, Return>, context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>): void
+
+export function params(arg0: any = { ...rpcFnHelperProps }, context?: any) {
     if (typeof arg0 == "function")
-        return rpcFnHelper.call(null, { ...rpcFnHelperProps }, arg0, context!)
+        return rpcFnHelper.call(null, { ...rpcFnHelperProps }, arg0, context)
     return rpcFnHelper.bind(null, arg0)
 }
 
+/**
+ * @description A route handler to intercept GET requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { getHandler } from "servell"
+ * export const GET = getHandler
+ * ```
+ */
 export const getHandler = async (req: Request, res: Response) => {
     return await genericHandler(req, res)
 }
 
+/**
+ * @description A route handler to intercept POST requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { postHandler } from "servell"
+ * export const POST = postHandler
+ * ```
+ */
 export const postHandler = async (req: Request, res: Response) => {
     return await genericHandler(req, res)
 }
 
+/**
+ * @description A route handler to intercept PUT requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { putHandler } from "servell"
+ * export const PUT = putHandler
+ * ```
+ */
 export const putHandler = async (req: Request, res: Response) => {
     return await genericHandler(req, res)
 }
 
+/**
+ * @description A route handler to intercept PATCH requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { patchHandler } from "servell"
+ * export const PATCH = patchHandler
+ * ```
+ */
 export const patchHandler = async (req: Request, res: Response) => {
     return await genericHandler(req, res)
 }
 
+/**
+ * @description A route handler to intercept DELETE requests
+ * @example
+ * ```typescript
+ * // /api/rpc/route.ts or /your-endpoint/route.ts
+ * import { deleteHandler } from "servell"
+ * export const DELETE = deleteHandler
+ * ```
+ */
 export const deleteHandler = async (req: Request, res: Response) => {
     return await genericHandler(req, res)
-}
-
-export type ClassDecoratorContext = {
-    kind: "class";
-    name: string | undefined;
-    addInitializer(initializer: () => void): void;
 }
 
 const RPCExtension = Symbol("RPCExtension")
@@ -116,7 +164,7 @@ const rpcFnHelperProps: RpcFnHelperProps = {
     method: "GET",
 }
 
-function rpcHelper(rpcProps: RpcHelperProps, klass: Class, context: ClassDecoratorContext) {
+function rpcHelper<This extends new (...args: any[]) => any>(rpcProps: RpcHelperProps, klass: This, context: ClassDecoratorContext<This>) {
     const { endpoint, _context: ctx } = rpcProps
 
     if (!endpoint) {
@@ -157,12 +205,13 @@ function rpcHelper(rpcProps: RpcHelperProps, klass: Class, context: ClassDecorat
 
     for (const key of Reflect.ownKeys(klass)) {
         if (!(key in subclass))
-            subclass[key as keyof typeof subclass] = klass[key as keyof typeof klass]
+            // @ts-ignore
+            subclass[key] = klass[key as keyof typeof klass]
     }
 
     return subclass
 
-    function browserRequestWrapper(fnName: string | symbol, fn: ExtendedFunction) {
+    function browserRequestWrapper<Args extends any[], Return>(fnName: string | symbol, fn: ExtendedFunction<This, Args, Return>) {
         return async (...args: any[]) => {
             const headers = new Headers(fn[RPCExtension]?.headers)
             headers.set("X-Servell-Function", context.name + '.' + String(fnName))
@@ -174,16 +223,16 @@ function rpcHelper(rpcProps: RpcHelperProps, klass: Class, context: ClassDecorat
                 cache: fn[RPCExtension]?.cache,
                 headers: headers,
             })
-            await fn(...args, result) ?? result
+            await (fn as any)(...args, result) ?? result
         }
     }
 
-    function serverResponseWrapper(fn: ExtendedFunction) {
+    function serverResponseWrapper<Args extends any[], Return>(fn: ExtendedFunction<This, Args, Return>) {
         return async (...args: any[]) => {
             const content = fn[RPCExtension]?.content ?? "json"
             let wrappedResult: Result<any, any> = { status: "error" }
             try {
-                const result = await fn(...args)
+                const result = await (fn as any)(...args)
                 switch (content) {
                     case "json":
                         wrappedResult = { status: "ok", data: result }
@@ -205,7 +254,7 @@ function rpcHelper(rpcProps: RpcHelperProps, klass: Class, context: ClassDecorat
     }
 }
 
-function rpcFnHelper<T>(rpcFnProps: RpcFnHelperProps, fn: ExtendedFunction, context: RpcFnHelperDecoratorContext<T>) {
+function rpcFnHelper<This, Args extends any[], Return>(rpcFnProps: RpcFnHelperProps, fn: ExtendedFunction<This, Args, Return>, context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>) {
     const { body, cache, content, headers, method } = rpcFnProps
     context.addInitializer(() => {
         fn[RPCExtension] = {
@@ -263,8 +312,6 @@ export type Result<T = undefined, U = undefined> =
         data?: U
     }
 
-type RpcFnHelperDecoratorContext<T> = ClassMethodDecoratorContext<T, (...args: any[]) => Promise<any>>
-
 type Class<T = any> = new (...args: any[]) => T
 
 type RpcNamespaces = Map<
@@ -286,7 +333,7 @@ interface RpcHelperProps {
     _context?: "server" | "client"
 }
 
-interface ExtendedFunction {
-    (...args: any[]): any,
-    [RPCExtension]: RpcFnHelperProps,
+interface ExtendedFunction<This, Args extends any[], Return> {
+    (this: This, ...args: Args): Return,
+    [RPCExtension]?: RpcFnHelperProps,
 }
