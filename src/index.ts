@@ -152,8 +152,8 @@ export const deleteHandler = async (req: Request, res: Response) => {
     return await genericHandler(req, res)
 }
 
-const RPCExtension = Symbol("RPCExtension")
-const rpcNamespaces: RpcNamespaces = new Map()
+const RPCExtension = Symbol("ServellRPCExtension")
+const rpcNamespaces: RpcNamespaces = (globalThis as any)["ServellRPCExtension"] ??= new Map()
 
 const rpcHelperProps: RpcHelperProps = {
     endpoint: "/api/rpc",
@@ -178,15 +178,17 @@ function rpcHelper<This extends new (...args: any[]) => any>(rpcProps: RpcHelper
     }
 
     context.addInitializer(() => {
-        const fnMap = new Map()
-        rpcNamespaces.set(endpoint + ':' + context.name, fnMap)
+        const name = endpoint + ':' + context.name
+        if (!rpcNamespaces.has(name)) rpcNamespaces.set(name, new Map())
+
+        const fnMap = rpcNamespaces.get(name)!
         const parent = klass.prototype
 
         for (const key of Reflect.ownKeys(parent)) {
             const member = parent[key]
             if (typeof member == "function") {
                 parent[key] = member.bind(parent)
-                if (!isAsyncFunction(member) || member.name.startsWith("#")) continue
+                if (!isAsyncFunction(member)) continue
 
                 if (ctx == "client") {
                     if (!isBrowser()) continue
@@ -213,16 +215,20 @@ function rpcHelper<This extends new (...args: any[]) => any>(rpcProps: RpcHelper
 
     function browserRequestWrapper<Args extends any[], Return>(fnName: string | symbol, fn: ExtendedFunction<This, Args, Return>) {
         return async (...args: any[]) => {
-            const headers = new Headers(fn[RPCExtension]?.headers)
+            const { method = "GET", body, cache, headers: h } = fn[RPCExtension] ?? {}
+            const hasBody = method != "GET" && body === true
+
+            const headers = new Headers(h)
             headers.set("X-Servell-Function", context.name + '.' + String(fnName))
-            headers.set("X-Servell-Args", JSON.stringify(args))
+            headers.set("X-Servell-Args", hasBody ? "body" : JSON.stringify(args))
 
             const result = await fetch(endpoint, {
-                method: fn[RPCExtension]?.method ?? "GET",
-                body: fn[RPCExtension]?.body,
-                cache: fn[RPCExtension]?.cache,
-                headers: headers,
+                method,
+                body: hasBody ? JSON.stringify(args) : undefined,
+                cache,
+                headers,
             })
+
             await (fn as any)(...args, result) ?? result
         }
     }
@@ -281,11 +287,12 @@ const genericHandler = async (req: Request, res: Response) => {
         throw new Error("The value of the 'X-Servell-Function' header is invalid")
     }
 
-    const args = JSON.parse(functionArgs) as any[]
+    const args: any[] = functionArgs == "body" ? await req.json() : JSON.parse(functionArgs)
     const url = new URL(req.url).pathname
     const fn = rpcNamespaces.get(url + ':' + klassName)?.get(fnName)
 
-    if (!fn) return Response.json({ status: "error" }, { status: 404 })
+    const data = `The rpc method '${klassName}.${fnName}' not found on path '${url}'`
+    if (!fn) return Response.json({ status: "error", data }, { status: 404 })
     const result = await fn(...args)
 
     const status = result.status == "ok" ? 200 : 500
@@ -324,7 +331,7 @@ interface RpcFnHelperProps {
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     content?: "json" | "text",
     headers?: HeadersInit,
-    body?: BodyInit,
+    body?: BodyInit | boolean,
     cache?: RequestCache,
 }
 
